@@ -1,5 +1,8 @@
 import pandas as pd
 import shapefile
+import matplotlib
+import matplotlib.pyplot as plt
+# plt.style.use('ggplot')
 
 # source = pd.read_csv('Data/yellow_tripdata_2018-12.csv', \
 source = pd.read_csv('Data/temp.csv', \
@@ -39,3 +42,15 @@ print("------------------------")
 print(trainData.describe())
 print("------------------------")
 print(testData.describe())
+sf = shapefile.Reader("Data/taxi_zones/taxi_zones.shp")
+reg_list={'Staten Island':1, 'Queens':2, 'Bronx':3, 'Manhattan':4, 'EWR':5, 'Brooklyn':6}
+matplotlib.use('Agg') # no UI backend
+plt.figure()
+for shape in sf.shapeRecords():
+    x = [i[0] for i in shape.shape.points[:]]
+    y = [i[1] for i in shape.shape.points[:]]
+    plt.plot(x,y,'k')
+plt.savefig("matplotlib.png")
+# fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15,8))
+# ax = plt.subplot(1, 2, 1)
+# ax.set_title("Boroughs in NYC")
