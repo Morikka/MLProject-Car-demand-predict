@@ -18,6 +18,7 @@ plt.figure()
 for sr in sf.shapeRecords():
   shape = sr.shape
   rec = sr.record
+  print(rec)
   axes = plt.gca()
   color=colors[reg_list[rec[5]]]
   nparts = len(shape.parts) # total parts
