@@ -1,11 +1,14 @@
 import pandas as pd
 import shapefile
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+# plt.style.use('ggplot')
 
 # source = pd.read_csv('Data/yellow_tripdata_2018-12.csv', \
 source = pd.read_csv('Data/temp.csv', \
 	dtype={'VendorID':'category','RatecodeID':'category','store_and_fwd_flag':'category','PULocationID':'category','DOLocationID':'category','payment_type':'category'}, \
 	parse_dates=["tpep_pickup_datetime","tpep_dropoff_datetime"])
-
 print(source.info())
 print("------------------------")
 # list first few rows (datapoints)
@@ -39,3 +42,4 @@ print("------------------------")
 print(trainData.describe())
 print("------------------------")
 print(testData.describe())
+
