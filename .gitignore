@@ -1,3 +1,6 @@
 Data/Yellow*
 .DS_Store
 *.png
+temp.py
+*.pyc
+*temp*
