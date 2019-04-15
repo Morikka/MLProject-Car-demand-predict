@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 # plt.style.use('ggplot')
 
-# source = pd.read_csv('Data/yellow_tripdata_2018-12.csv', \
+# source = pd.read_csv('Data/yellow_tripdata_2018-12.csv',
 source = pd.read_csv('Data/temp.csv', 
 	dtype={'VendorID':'category','RatecodeID':'category','store_and_fwd_flag':'category','PULocationID':'category','DOLocationID':'category','payment_type':'category'}, \
 	parse_dates=["tpep_pickup_datetime","tpep_dropoff_datetime"])
@@ -36,7 +36,7 @@ print("------------------------")
 print(source.head())
 # Remove other time data
 time_start = pd.Timestamp('2018-12-01 00:00:00')
-time_end = pd.Timestamp('2018-12-30 23:59:59')
+time_end = pd.Timestamp('2018-12-31 23:59:59')
 source = source.where(source['tpep_pickup_datetime']>=time_start)
 source = source.where(source['tpep_pickup_datetime']<time_end)
 print('New size(2): %d' % len(source))
@@ -56,4 +56,9 @@ source = source.groupby([source['tpep_pickup_datetime'].dt.date,\
                         source['tpep_dropoff_datetime'].dt.hour,\
                         'PULocationID','DOLocationID']).size()
 
+# manually add the header info plz (will fix later)
+# pickup_date, pickup_hour, dropoff_date, dropoff_hour,pickup_place,dropoff_place,number
+# "pickup_date", "pickup_hour", "dropoff_date", "dropoff_hour","pickup_place","dropoff_place","number"
 source.to_csv('temp.csv')
+
+
