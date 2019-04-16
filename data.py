@@ -40,7 +40,7 @@ time_end = pd.Timestamp('2018-12-31 23:59:59')
 source = source.where(source['tpep_pickup_datetime']>=time_start)
 source = source.where(source['tpep_pickup_datetime']<time_end)
 print('New size(2): %d' % len(source))
-time1 = pd.Timestamp('2018-12-19 23:59:59')
+time1 = pd.Timestamp('2018-12-20 23:59:59')
 trainData = source.where(source["tpep_pickup_datetime"]<time1)
 testData = source.where(source["tpep_pickup_datetime"]>=time1)
 print("------------------------")
@@ -51,14 +51,12 @@ print(testData.describe())
 source = source.drop(columns=['payment_type','fare_amount','extra','mta_tax','tip_amount','tolls_amount','improvement_surcharge','total_amount'])
 # Group Data
 source = source.groupby([source['tpep_pickup_datetime'].dt.date,\
-                        source['tpep_pickup_datetime'].dt.hour,\
                         source['tpep_dropoff_datetime'].dt.date,\
+                        source['tpep_pickup_datetime'].dt.hour,\
                         source['tpep_dropoff_datetime'].dt.hour,\
                         'PULocationID','DOLocationID']).size()
 
 # manually add the header info plz (will fix later)
-# pickup_date, pickup_hour, dropoff_date, dropoff_hour,pickup_place,dropoff_place,number
-# "pickup_date", "pickup_hour", "dropoff_date", "dropoff_hour","pickup_place","dropoff_place","number"
+# pickup_date,dropoff_date,pickup_hour,dropoff_hour,pickup_place,dropoff_place,number
+# "pickup_date", "dropoff_date", "pickup_hour", "dropoff_hour","pickup_place","dropoff_place","number"
 source.to_csv('temp.csv')
-
-
