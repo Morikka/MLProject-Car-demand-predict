@@ -1,6 +1,10 @@
 import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense, Activation
+import keras.backend as K
+
+def mean_pred(y_true, y_pred):
+  return K.mean(y_pred)
 
 source = pd.read_csv('temp.csv')
   # dtype={'pickup_place':'category','dropoff_place':'category'})
@@ -20,14 +24,14 @@ x_test = testData.iloc[:,2:6]
 y_test = testData.iloc[:,6]
 model = Sequential()
 
-model.add(Dense(units=8, activation='relu', input_dim=4))
+model.add(Dense(units=8, activation='softmax', input_dim=4))
 model.add(Dense(units=1, activation='softmax'))
 
 model.summary()
 
 model.compile(loss='mean_squared_error',
               optimizer='sgd',
-              metrics=['accuracy'])
+              metrics=['accuracy', mean_pred])
 
 history = model.fit(x_train, y_train,
                     batch_size=10,
