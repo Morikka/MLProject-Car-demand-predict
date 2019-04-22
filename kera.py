@@ -6,22 +6,23 @@ import keras.backend as K
 def mean_pred(y_true, y_pred):
   return K.mean(y_pred)
 
-source = pd.read_csv('temp.csv')
-  # dtype={'pickup_place':'category','dropoff_place':'category'})
+source = pd.read_csv('temp.csv',
+  dtype={'pickup_place':'category','dropoff_place':'category'})
 # print(type(source))
 source['pickup_date'] =  pd.to_datetime(source['pickup_date'])
 source['dropoff_date'] =  pd.to_datetime(source['dropoff_date'])
 
-time_start = pd.to_datetime('2019-12-21')
+time_start = pd.to_datetime('2018-12-21')
 trainData = source.where(source['pickup_date']<time_start)
 trainData = trainData.dropna(how = 'any', axis = 'rows')
 testData = source.where(source['pickup_date']>=time_start)
 testData = testData.dropna(how = 'any', axis = 'rows')
-# print()
+# print(trainData)
 x_train = trainData.iloc[:,2:6]
 y_train = trainData.iloc[:,6]
 x_test = testData.iloc[:,2:6]
 y_test = testData.iloc[:,6]
+# print(x_train)
 model = Sequential()
 
 model.add(Dense(units=8, activation='softmax', input_dim=4))
@@ -31,7 +32,7 @@ model.summary()
 
 model.compile(loss='mean_squared_error',
               optimizer='sgd',
-              metrics=['accuracy', mean_pred])
+              metrics=['accuracy'])
 
 history = model.fit(x_train, y_train,
                     batch_size=10,

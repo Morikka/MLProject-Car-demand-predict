@@ -5,3 +5,5 @@ temp.py
 *.pyc
 *temp*
 info.py
+*fake.csv
+Play/*
