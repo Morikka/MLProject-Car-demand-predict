@@ -9,3 +9,5 @@ info.py
 Play/*
 *.csv
 *.rtf
+model*
+*tmp.py

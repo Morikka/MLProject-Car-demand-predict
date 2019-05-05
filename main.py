@@ -5,17 +5,18 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import numpy as np
 from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Activation
 from keras.layers.convolutional import Conv3D
 from keras.layers.convolutional_recurrent import ConvLSTM2D
 from keras.layers.normalization import BatchNormalization
 
 # sample = 28
 sample = 24
-
 trainsample = sample - 1
 # time = 24
 time = 28
-testtime = time - 5
+testtime = time - 4
 size1 = 15
 size2 = 15
 batchsize = 30
@@ -46,11 +47,14 @@ seq.add(BatchNormalization())
 seq.add(Conv3D(filters=1, kernel_size=(3, 3, 3),
                activation='sigmoid',
                padding='same', data_format='channels_last'))
-seq.compile(loss='mean_squared_error', optimizer='adam')
+seq.compile(loss='mean_squared_logarithmic_error', optimizer='adam',metrics='mean_squared_logarithmic_error')
+print("______________________________________")
+print(seq.summary())
+print("______________________________________")
 
 def getData():
   global num_max
-  source = pd.read_csv('data/traincar.csv', parse_dates=["pickup_datetime"])
+  source = pd.read_csv('data/train(201502).csv', parse_dates=["pickup_datetime"])
   print("---finish import---")
   source = source.dropna(how = 'any', axis = 'rows')
   source = source[['pickup_datetime','pickup_longitude','pickup_latitude']]
@@ -58,19 +62,6 @@ def getData():
     'pickup_longitude':float,
     'pickup_latitude':float
     })
-  # print(source.dtypes)
-  # for item in source.iterrows():
-  #   if (abs(item[1]['pickup_longitude']-0))<0.001:
-  #     # print(item[1])
-  #     source = source.drop(item[0])
-  #   elif (abs(item[1]['pickup_latitude']-0))<0.001:
-  #     # print(item[1])
-  #     source = source.drop(item[0])
-  #   # elif (item[1]['pickup_longitude']<-74.252193 or item[1]['pickup_longitude']>-72.986532) and (abs(item[1]['pickup_longitude']-0))>0.001:
-  #   elif (item[1]['pickup_longitude']<-73.992501 or item[1]['pickup_longitude']>-73.968013) and (abs(item[1]['pickup_longitude']-0))>0.001:
-  #     source = source.drop(item[0])
-  #   elif (item[1]['pickup_latitude']<40.736125 or item[1]['pickup_latitude']>40.767113) and (abs(item[1]['pickup_latitude']-0))>0.001:
-  #     source = source.drop(item[0])
   print(source.size)
   lon_max = source['pickup_longitude'].max() + 0.0000000001
   lon_min = source['pickup_longitude'].min()
@@ -125,11 +116,11 @@ def main():
   #Train the network - use 26 days(or can be regarded as 27 days train 26 times)
   newdata = data[1:trainsample]
   olddata = data[:trainsample-1]
-  seq.fit(olddata,newdata, batch_size=batchsize, epochs=epochs, validation_split=0.2)
+  seq.fit(olddata,newdata, batch_size=batchsize, epochs=epochs, validation_split=0.05)
   print("---finish training---")
 
   #Test the network - use the last day
-  testdata = data[sample-1]
+  testdata = data[sample-2]
   # use the first 20 hours to get the last 4
   track = testdata[:testtime,::,::,::]
   # print(">>>>>><><>",track.shape)
@@ -145,9 +136,9 @@ def main():
   # print(data[sample-1][20][:,:,0].shape)
   # print(data[sample-1][20][:,:,0].tolist())
   # print(track[23][:,:,0].tolist())
-  print("The Norm Value is: ",num_max)
-  F = open("t.out","w")
-  np.set_printoptions(precision=3)
+  # print("The Norm Value is: ",num_max)
+  F = open("model8.out","w")
+  F.write("The first result: ")
   for i in range(time-testtime):
     F.write("The time is: "+str(i+testtime)+"\n")
     # F.write(str(data[sample-1][i+testtime][:,:,0].tolist()))
@@ -163,6 +154,38 @@ def main():
       for j2 in range(size2):
         F.write(str(int(num_max*tmp[j1][j2]))+" ")
       F.write('\n')
+
+  testdata = data[sample-1]
+  # use the first 20 hours to get the last 4
+  track = testdata[:testtime,::,::,::]
+  # print(">>>>>><><>",track.shape)
+
+  for i in range(time-testtime):
+    print("The time",i)
+    new_pos = seq.predict(track[np.newaxis, ::, ::, ::, ::])
+    new = new_pos[::, -1, ::, ::, ::]
+    track = np.concatenate((track, new), axis=0)
+    score = seq.evaluate(track[np.newaxis, ::, ::, ::, ::],testdata[:(testtime+i+1)][np.newaxis, ::, ::, ::, ::], batch_size=batchsize, verbose=1)
+    print(score)
+  print(track.shape)
+
+  F.write("The second result: ")
+  for i in range(time-testtime):
+    F.write("The time is: "+str(i+testtime)+"\n")
+    # F.write(str(data[sample-1][i+testtime][:,:,0].tolist()))
+    tmp = testdata[i+testtime][:,:,0].tolist()
+    for j1 in range(size1):
+      for j2 in range(size2):
+        F.write(str(int(num_max*tmp[j1][j2]))+" ")
+      F.write('\n')
+    F.write('\n')
+    # F.write(str(track[i+testtime][:,:,0].tolist()))
+    tmp = track[i+testtime][:,:,0].tolist()
+    for j1 in range(size1):
+      for j2 in range(size2):
+        F.write(str(int(num_max*tmp[j1][j2]))+" ")
+      F.write('\n')
+
   F.close()
   # and compare the preditions later
 
@@ -170,7 +193,7 @@ def test():
   data = getData()
   cnt = 0
   # print(data[27][19][:,:,0].tolist())
-  F = open("car.out","w")
+  F = open("model7.out","w")
   np.set_printoptions(precision=3)
   for i in range(sample):
     F.write("Hour is : "+str(i)+'\n')
